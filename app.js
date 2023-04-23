@@ -142,6 +142,9 @@ app.post('/sendPrompt', async (req, res) => {
 		return res.json(completion.data.choices[0].message);
 	}
 });
+app.get('/', async (req, res) => {
+	res.send('<h2>Servidor corriendo correctamente...</h2>');
+});
 app.get('/recetas', async (req, res) => {
 	const recetas = await Receta.find().sort({ createdAt: -1 });
 	res.json(recetas);
