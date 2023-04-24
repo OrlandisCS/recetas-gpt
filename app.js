@@ -1,3 +1,6 @@
+import { fileURLToPath } from 'url';
+import path from 'path';
+
 import express from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
@@ -8,10 +11,13 @@ import { dbConection } from './db/conection.js';
 import Receta from './models/recetas.js';
 
 dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'dist')));
+
 dbConection();
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -69,6 +75,11 @@ const guardarEnDB = async (receta, nombre, decripcion, imagen) => {
 	await guardarDatos.save();
 	console.log('receta guardada...');
 };
+
+app.get('/', async (req, res) => {
+	res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 app.post('/sendPrompt', async (req, res) => {
 	console.log('\n');
 
@@ -142,9 +153,7 @@ app.post('/sendPrompt', async (req, res) => {
 		return res.json(completion.data.choices[0].message);
 	}
 });
-app.get('/', async (req, res) => {
-	res.send('<h2>Servidor corriendo correctamente...</h2>');
-});
+
 app.get('/recetas', async (req, res) => {
 	const recetas = await Receta.find().sort({ createdAt: -1 });
 	res.json(recetas);
