@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    container_name: ${MONGO_DB_USERNAME}
+    image: mongo:6.0
+    volumes:
+      - poke-vol:/data/db
+    ports:
+      - ${MONGO_EXPOSE_PORT}:${MONGO_EXPOSE_PORT}
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    command: ['--auth']
+
+  recetas:
+    depends_on:
+      - db
+    image: orlandiscs/recetario:production
+    ports:
+      - 3000:3000
+    environment:
+      MONGODB: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_DB_USERNAME}:27017
+      DB_NAME: ${MONGO_DB_USERNAME}
+    restart: always
+
+volumes:
+  poke-vol:
+    external: false
